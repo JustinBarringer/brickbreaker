@@ -1,17 +1,16 @@
 document.addEventListener("DOMContentLoaded", () => {
   const gameBoardElement = document.getElementById('game-board')
-  const paddle = new Paddle(gameBoardElement)
-  const ball = new Ball(gameBoardElement)
-  let brickNumber = 16
+  const gameBoard = new GameBoard(gameBoardElement)
+  /*let brickNumber = 16
   for(let i = 0; i < brickNumber; i++) {
     const brick = new Brick(gameBoardElement, i + 1)
-  }
-
+  }*/
+  const brickGrid = new BrickGrid(gameBoardElement)
   document.body.addEventListener("keydown", (event) => {
     if (event.code == 'ArrowLeft') {
-      paddle.moveLeft(10)
+      gameBoard.paddle.moveLeft(10)
     } else if (event.code == 'ArrowRight') {
-      paddle.moveRight(10)
+      gameBoard.paddle.moveRight(10)
     }
   })
 })
@@ -22,15 +21,17 @@ class Paddle {
     this.rightBorder = gameBoardElement.clientWidth
     this.leftBorder = 0
     this.width = 100
+    this.height = 20
+    this.bottom = 10
     this.paddle = document.createElement('div')
     const paddle = this.paddle
     paddle.style.width = 100 + 'px'
-    paddle.style.height = '20px'
+    paddle.style.height = 20 + 'px'
     paddle.style.borderRadius = '5px'
     paddle.style.backgroundColor = 'blue'
     paddle.style.position = 'absolute'
     paddle.style.left = this.positionX + 'px'
-    paddle.style.bottom = '10px'
+    paddle.style.bottom = this.bottom + 'px'
     gameBoardElement.appendChild(paddle)
   }
 
@@ -85,53 +86,66 @@ class Ball {
     element.style.bottom = this.position.y + 'px'
     gameBoardElement.appendChild(element)
 
-    window.setInterval(this.update.bind(this), 16.6)
-  }
-
-
-  update() {
-    if (this.position.x + this.velocity.x + this.radius * 2 > 
-      this.rightBorder || this.position.x + this.velocity.x < this.leftBorder) {
-        this.velocity.x *= -1
-    }
-    if (this.position.y + this.velocity.y + this.radius * 2 >
-      this.topBorder) {
-        this.velocity.y *= -1
-    } else if (this.position.y + this.velocity.y < this.bottomBorder) {
-      this.velocity.y *= -1
-      /*this.velocity.y = 0
-      this.velocity.x = 0
-      alert('You lose')*/
-    }
-    this.position.x += this.velocity.x
-    this.position.y += this.velocity.y
-    this.element.style.left = this.position.x + 'px'
-    this.element.style.bottom = this.position.y + 'px'
   }
 }
 
 class GameBoard {
-  constructor() {
+  constructor(gameBoardElement) {
+    this.paddle = new Paddle(gameBoardElement)
+    this.ball = new Ball(gameBoardElement)
+    window.setInterval(this.update.bind(this), 16.6)
+  }
 
+  update() {
+    console.log(`paddleX: ${this.paddle.positionX}
+    ballX = ${this.ball.position.x}`)
+    if (this.ball.position.x + this.ball.velocity.x + this.ball.radius * 2 > 
+      this.ball.rightBorder || this.ball.position.x + this.ball.velocity.x < this.ball.leftBorder) {
+        this.ball.velocity.x *= -1
+    }
+    if (this.ball.position.y + this.ball.velocity.y + this.ball.radius * 2 >
+      this.ball.topBorder) {
+        this.ball.velocity.y *= -1
+    } else if (this.ball.position.y + this.ball.velocity.y < this.ball.bottomBorder) {
+      //this.ball.velocity.y *= -1
+      this.ball.velocity.y = 0
+      this.ball.velocity.x = 0
+      alert('You lose')
+    }
+    if(this.ball.position.x > this.paddle.positionX && 
+        this.ball.position.x < this.paddle.positionX + this.paddle.width &&
+        this.ball.position.y == this.paddle.bottom + this.paddle.height
+      ) {
+      this.ball.velocity.y *= -1
+    }
+    this.ball.position.x += this.ball.velocity.x
+    this.ball.position.y += this.ball.velocity.y
+    this.ball.element.style.left = this.ball.position.x + 'px'
+    this.ball.element.style.bottom = this.ball.position.y + 'px'
   }
 }
 
 class Brick {
-  constructor(gameBoardElement, num) {
-    this.position = {x: (60 * num) - 50, y: 375}
+  constructor(gameBoardElement) {
     this.element = document.createElement('div')
+    this.width = 50
+    this.height = 10
+    this.position = {x: 350, y: 10}
     const element = this.element
-    if (num % 6 == 0) {
-      this.position.y -= 30
-      this.position.x = (60 * (num - 6)) - 50
-    }
-
     element.style.backgroundColor = 'gray'
-    element.style.width = '50px'
-    element.style.height = '10px'
+    element.style.width = this.width + 'px'
+    element.style.height = this.height + 'px'
     element.style.position = 'absolute'
-    element.style.left = this.position.x + 'px'
-    element.style.bottom = this.position.y + 'px'
     gameBoardElement.appendChild(this.element)
   }
+}
+
+class BrickGrid{
+  constructor(gameBoardElement) {
+    this.prevBrick = null
+    this.brickCount = 24
+    this.width = Brick.width
+    this.height = Brick.height
+  }  
+  
 }
