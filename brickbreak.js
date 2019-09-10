@@ -134,6 +134,15 @@ class GameBoard {
       ) {
       this.ball.velocity.y *= -1
     }
+
+    if (this.ball.position.x > this.brickGrid.brick.position.x &&
+        this.ball.position.x < this.brickGrid.brick.position.x + this.brickGrid.brick.width &&
+        this.ball.position.y == this.brickGrid.brick.position.y               
+        ) {
+          this.ball.velocity.y *= -1
+        }
+
+
     this.ball.position.x += this.ball.velocity.x
     this.ball.position.y += this.ball.velocity.y
     this.ball.element.style.left = this.ball.position.x + 'px'
@@ -142,11 +151,12 @@ class GameBoard {
 }
 
 class Brick {
-  constructor(gameBoardElement) {
+  constructor(gameBoardElement, previousBrickX, brickRow) {
     this.element = document.createElement('div')
     this.width = 50
     this.height = 10
-    this.position = {x: 10, y: 350}
+    this.brickGap = 10
+    this.position = {x: this.brickGap + (previousBrickX), y: 350 - (brickRow * 20)}
 
 
     const element = this.element
@@ -162,12 +172,20 @@ class Brick {
 
 class BrickGrid {
   constructor(gameBoardElement) {
-    this.brickCount = 6
+    this.brickCount = 30
+    this.brickPositionX = 0
+    this.brickRow = 0
     for (let i = 0; i < this.brickCount; i++) {
-      this.brick = new Brick(gameBoardElement)
-      this.brick.position.x += 60    
+      this.brick = new Brick(gameBoardElement, this.brickPositionX, this.brickRow)
+      this.bricksPerRow = Math.floor(gameBoardElement.clientWidth / (this.brick.width + 10))
+      console.log(`bricks per row: ${this.bricksPerRow}`)
+      if ((i + 1) % this.bricksPerRow == 0) {
+        this.brickRow += 1
+        this.brickPositionX = 0
+      } else {
+        this.brickPositionX += 60 
+      }
     }
-    this.bricksPerRow = Math.floor(gameBoardElement.clientWidth / this.brick.width)
   }
 
 
